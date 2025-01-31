@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f9;
+        color: #333;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      .flash-message {
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .submit-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+      }
+      .submit-button:hover {
+        background-color: #218838;
+      }
+      .logout-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #dc3545;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+      }
+      .logout-button:hover {
+        background-color: #c82333;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+      th {
+        background-color: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Admin Panel</h1>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <div class="flash-message {{ category }}">{{ message }}</div>
+    {% endfor %} {% endif %} {% endwith %}
+
+    <!-- Add Key Form -->
+    <h2>Add Key</h2>
+    <form method="POST">
+      <input type="hidden" name="action" value="add_key" />
+      <div class="form-group">
+        <label for="key">Key:</label>
+        <input type="text" id="key" name="key" required />
+      </div>
+      <div class="form-group">
+        <label for="proxy_limit">Limit:</label>
+        <input type="number" id="proxy_limit" name="proxy_limit" required />
+      </div>
+      <button type="submit" class="submit-button">Add Key</button>
+    </form>
+
+    <!-- Delete Key Form -->
+    <h2>Delete Key</h2>
+    <form method="POST">
+      <input type="hidden" name="action" value="delete_key" />
+      <div class="form-group">
+        <label for="key">Key:</label>
+        <input type="text" id="key" name="key" required />
+      </div>
+      <button type="submit" class="submit-button">Delete Key</button>
+    </form>
+
+    <!-- Edit Limit Form -->
+    <h2>Edit Limit</h2>
+    <form method="POST">
+      <input type="hidden" name="action" value="edit_limit" />
+      <div class="form-group">
+        <label for="key">Key:</label>
+        <input type="text" id="key" name="key" required />
+      </div>
+      <div class="form-group">
+        <label for="proxy_limit">New Limit:</label>
+        <input type="number" id="proxy_limit" name="proxy_limit" required />
+      </div>
+      <button type="submit" class="submit-button">Edit Limit</button>
+    </form>
+
+    <!-- List of Keys -->
+    <h2>Keys</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Limit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for key in keys %}
+        <tr>
+          <td>{{ key[1] }}</td>
+          <td>{{ key[2] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Logout Button -->
+    <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+  </body>
+</html>

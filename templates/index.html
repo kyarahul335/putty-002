@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSH Command Executor</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f9;
+        color: #333;
+      }
+      .logout-button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background-color: #dc3545;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+      }
+      .logout-button:hover {
+        background-color: #c82333;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      .flash-message {
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .hidden {
+        display: none;
+      }
+      .log-container {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .log-container h2 {
+        margin-top: 0;
+        font-size: 24px;
+        color: #555;
+      }
+      .log-entry {
+        margin-bottom: 15px;
+      }
+      .log-entry h3 {
+        margin-bottom: 5px;
+        font-size: 18px;
+        color: #333;
+      }
+      .log-output {
+        white-space: pre-wrap;
+        font-family: monospace;
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+      }
+      .download-button {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      .download-button:hover {
+        background-color: #218838;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Logout Button -->
+    <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+    <h1>SSH Command Executor - by fireRanu</h1>
+    <h2>
+      Telegram - <a href="https://t.me/fireRanu" target="_blank">Contact</a>
+    </h2>
+
+    <!-- Add this near the logout button -->
+    <a href="{{ url_for('admin') }}" class="admin-button">Admin Panel</a>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <div class="flash-message {{ category }}">{{ message }}</div>
+    {% endfor %} {% endif %} {% endwith %}
+
+    <!-- Form -->
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="ip_list"
+          >IP List (comma-separated, space-separated, or
+          newline-separated):</label
+        >
+        <textarea id="ip_list" name="ip_list" rows="5" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <select id="username" name="username" required>
+          <option value="ubuntu">ubuntu</option>
+          <option value="admin">admin</option>
+          <option value="root">root</option>
+          <option value="administrator">administrator</option>
+          <option value="Admin">Admin</option>
+          <option value="Administrator">Administrator</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+
+      <div class="form-group hidden" id="custom-username-field">
+        <label for="custom_username">Enter Custom Username:</label>
+        <input type="text" id="custom_username" name="custom_username" />
+      </div>
+
+      <div class="form-group">
+        <label for="auth_method">Authentication Method:</label>
+        <select id="auth_method" name="auth_method" required>
+          <option value="password">Password</option>
+          <option value="key">SSH Key</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="password-field">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" />
+      </div>
+
+      <div class="form-group" id="key-file-field">
+        <label for="key_file">SSH Key File (.pem):</label>
+        <input type="file" id="key_file" name="key_file" />
+      </div>
+
+      <div class="form-group">
+        <label for="action">Action:</label>
+        <select id="action" name="action" required>
+          <option value="create_proxy">Create Proxy</option>
+          <option value="port_change">Change Port</option>
+          <option value="uninstall">Uninstall</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="proxy-fields">
+        <label for="proxy_username">Proxy Username:</label>
+        <input type="text" id="proxy_username" name="proxy_username" />
+        <label for="proxy_password">Proxy Password:</label>
+        <input type="password" id="proxy_password" name="proxy_password" />
+      </div>
+
+      <div class="form-group" id="port-field">
+        <label for="new_port">New Port:</label>
+        <input type="number" id="new_port" name="new_port" />
+      </div>
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <!-- Logs Section -->
+    <div class="log-container">
+      <h2>Command Execution Logs</h2>
+      {% if logs %} {% for ip, log in logs.items() %}
+      <div class="log-entry">
+        <h3>IP: {{ ip }}</h3>
+        <div class="log-output">
+          <strong>Output:</strong><br />{{ log[0] if log[0] else "No output" }}
+          <br /><br />
+          <strong>Error:</strong><br />{{ log[1] if log[1] else "No errors" }}
+        </div>
+      </div>
+      {% endfor %} {% else %}
+      <p>No logs available.</p>
+      {% endif %}
+    </div>
+
+    <!-- Download Button -->
+    {% if session.get("file_content") %}
+    <a href="{{ url_for('download_with_credentials') }}" class="download-button"
+      >Download Proxy Details</a
+    >
+    {% endif %}
+
+    <!-- Add this after the logs section -->
+    {% if session.get("ip_list") and session.get("new_port") %}
+    <a href="{{ url_for('download_with_credentials') }}" class="download-button"
+      >Download Proxy Details</a
+    >
+    {% endif %}
+
+    <script>
+      // Show/hide fields based on selected action
+      document.getElementById("action").addEventListener("change", function () {
+        const action = this.value;
+        document.getElementById("proxy-fields").style.display =
+          action === "create_proxy" ? "block" : "none";
+        document.getElementById("port-field").style.display =
+          action === "port_change" ? "block" : "none";
+      });
+
+      // Show/hide fields based on authentication method
+      document
+        .getElementById("auth_method")
+        .addEventListener("change", function () {
+          const method = this.value;
+          document.getElementById("password-field").style.display =
+            method === "password" ? "block" : "none";
+          document.getElementById("key-file-field").style.display =
+            method === "key" ? "block" : "none";
+        });
+
+      // Show/hide custom username field
+      document
+        .getElementById("username")
+        .addEventListener("change", function () {
+          const username = this.value;
+          document.getElementById("custom-username-field").style.display =
+            username === "custom" ? "block" : "none";
+        });
+
+      // Trigger initial state
+      document.getElementById("action").dispatchEvent(new Event("change"));
+      document.getElementById("auth_method").dispatchEvent(new Event("change"));
+      document.getElementById("username").dispatchEvent(new Event("change"));
+    </script>
+  </body>
+</html>
